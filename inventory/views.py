@@ -628,6 +628,32 @@ def inventory_management(request):
         }
         for supplier in supplier_list
     }
+    supplied_products = [
+        product
+        for supplier in supplier_list
+        for product in supplier.visible_supplied_products
+    ]
+    product_names = {product.name for product in supplied_products}
+    supplier_names = {supplier.name for supplier in supplier_list}
+    existing_items = {
+        item.name: item
+        for item in Item.objects.filter(name__in=product_names).select_related("category")
+    }
+    latest_purchase_prices = {}
+    for purchase in (
+        InventoryTransaction.objects.filter(
+            tx_type=InventoryTransaction.TxType.IN_,
+            supplier_name__in=supplier_names,
+            item__name__in=product_names,
+            unit_price__isnull=False,
+        )
+        .order_by("-tx_date", "-tx_id")
+        .values("supplier_name", "item__name", "unit_price")
+    ):
+        latest_purchase_prices.setdefault(
+            (purchase["supplier_name"], purchase["item__name"]),
+            str(purchase["unit_price"]),
+        )
     supplier_product_choices = {
         supplier.name: [
             {
@@ -636,6 +662,12 @@ def inventory_management(request):
                 "unit": product.unit,
                 "account": product.account_id,
                 "account_label": f"{product.account.code} - {product.account.account_name}",
+                "category_id": (
+                    existing_items[product.name].category_id
+                    if product.name in existing_items
+                    else ""
+                ),
+                "unit_price": latest_purchase_prices.get((supplier.name, product.name), ""),
             }
             for product in supplier.visible_supplied_products
         ]
