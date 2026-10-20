@@ -132,6 +132,57 @@ class StoreOutTests(TestCase):
         self.assertContains(response, "60.000")
         self.assertContains(response, "60% left")
 
+    def test_inventory_form_orders_fields_and_prefills_product_data(self):
+        account_type = AccountType.objects.create(
+            name="Inventory Suppliers",
+            account_nature=AccountType.AccountNature.EXPENSE,
+            show_on_suppliers=True,
+        )
+        account = ChartOfAccount.objects.create(
+            account_name="Feed Purchases",
+            account_type=account_type,
+            show_on_suppliers=True,
+        )
+        supplier = Supplier.objects.create(name="Feed Supplier")
+        product = SupplierProduct.objects.create(
+            account=account,
+            name=self.item.name,
+            unit=self.item.unit,
+        )
+        supplier.supplied_products.add(product)
+        InventoryTransaction.objects.create(
+            tx_date=date.today(),
+            tx_type=InventoryTransaction.TxType.IN_,
+            store=self.store,
+            item=self.item,
+            quantity=Decimal("5.000"),
+            supplier_name=supplier.name,
+            unit_price=Decimal("25.50"),
+            created_by=self.user,
+        )
+
+        response = self.client.get(reverse("inventory_management"))
+
+        self.assertEqual(response.status_code, 200)
+        form = response.content.decode()
+        field_positions = [
+            form.index('id="category"'),
+            form.index('id="supplier_name"'),
+            form.index('id="supplier_product"'),
+            form.index('id="unit"'),
+            form.index('id="quantity"'),
+            form.index('id="unit_price"'),
+            form.index('id="total_amount"'),
+            form.index('id="payment_method"'),
+        ]
+        self.assertEqual(field_positions, sorted(field_positions))
+        self.assertIn('id="total_amount" type="number"', form)
+        self.assertIn("readonly", form[form.index('id="total_amount"'):])
+        product_choice = response.context["supplier_product_choices"][supplier.name][0]
+        self.assertEqual(product_choice["unit"], "kg")
+        self.assertEqual(product_choice["category_id"], self.category.pk)
+        self.assertEqual(product_choice["unit_price"], "25.50")
+
     def test_inventory_purchase_saves_credit_terms(self):
         Supplier.objects.create(
             name="Kafika",
