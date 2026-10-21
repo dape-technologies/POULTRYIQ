@@ -27,7 +27,7 @@
 
     <!-- Auth for investor -->
     {% if request.user.is_authenticated and request.user.is_investor %}
-    <link rel="stylesheet" href="{% static 'css/investor.css' %}">
+    <link rel="stylesheet" href="{% static 'css/investor-ui.css' %}?v=executive-4">
     {% endif %}
 
 
@@ -40,7 +40,7 @@
 <!-- ==========================================================
      Base layout: page shell and global role-based navigation
      ========================================================== -->
-<body{% if request.user.is_authenticated and request.user.is_supervisor %} class="supervisor-ui"{% endif %}>
+<body{% if request.user.is_authenticated and request.user.is_supervisor %} class="supervisor-ui"{% elif request.user.is_authenticated and request.user.is_investor %} class="investor-ui"{% endif %}>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 
@@ -51,10 +51,16 @@
 {% if request.user.is_authenticated and request.user.is_investor %}
 
 <!-- investor navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark px-3 shadow-lg">
+<nav class="navbar navbar-expand-lg investor-navbar px-3">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'investor' %}">
-        <i class="bi bi-egg-fill me-2"></i>PoultryIQ Investor
+        <i class="bi bi-egg-fill me-2"></i>PoultryIQ
     </a>
+
+    <span class="investor-nav-context" aria-label="Current investor page">
+        {% if request.resolver_match.url_name == 'valuation' %}Valuation
+        {% elif request.resolver_match.url_name == 'investor_reports' %}Reports
+        {% else %}Overview{% endif %}
+    </span>
 
     <!-- nav toggler -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#investorNavbar" aria-controls="investorNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +72,7 @@
         <ul class="navbar-nav ms-auto">
             <!-- user name display -->
             <li class="nav-item">
-                <span class="nav-link" style="cursor: default;">
+                <span class="nav-link investor-identity">
                     <i class="bi bi-person-circle me-1"></i>
                     <small>{{ request.user.get_full_name|default:request.user.username }}</small>
                 </span>
@@ -75,7 +81,7 @@
             <!-- navigation links -->
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'investor' %}active{% endif %}" href="{% url 'investor' %}">
-                    <i class="bi bi-house-door me-1"></i>Dashboard
+                    <i class="bi bi-grid-1x2 me-1"></i>Overview
                 </a>
             </li>
             <li class="nav-item">
@@ -97,7 +103,7 @@
             <li class="nav-item">
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
-                    <button class="nav-link d-flex align-items-center text-warning border-0 bg-transparent" type="submit">
+                    <button class="nav-link d-flex align-items-center investor-logout border-0 bg-transparent" type="submit">
                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                     </button>
 
@@ -107,7 +113,7 @@
     </div>
 </nav>
 
-<main class="container-fluid p-4 bg-light min-vh-100" id="main-content" tabindex="-1">
+<main class="investor-main" id="main-content" tabindex="-1">
 
 {% else %}
 
@@ -527,7 +533,7 @@
     </a>
     {% elif request.user.is_investor %}
     <a href="{% url 'investor' %}" class="btn btn-light btn-sm shadow-sm">
-        <i class="bi bi-house-door me-1"></i>Back to Home
+        <i class="bi bi-grid-1x2 me-1"></i>Back to overview
     </a>
     {% else %}
     <a href="{% url 'managerdash' %}" class="btn btn-light btn-sm shadow-sm">

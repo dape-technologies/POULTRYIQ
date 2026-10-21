@@ -15,6 +15,10 @@ env/
 media/
 staticfiles/
 
+# Frontend dependencies and generated assets
+node_modules/
+static/css/tailwind.css
+
 # Editors and operating systems
 .vscode/
 .idea/

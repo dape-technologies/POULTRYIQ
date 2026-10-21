@@ -68,7 +68,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <form method="POST" action="{% url 'login' %}" class="auth-form">
+                <form method="POST" action="{% url 'login' %}" class="auth-form" id="login-form">
                     {% csrf_token %}
 
                     <!-- Username Field -->
@@ -135,6 +135,7 @@
 
 {% include 'includes/powered_by_footer.html' %}
 
+<script src="{% static 'js/login-csrf.js' %}?v=1"></script>
 <script>
     function togglePassword() {
         const passwordInput = document.getElementById('password');

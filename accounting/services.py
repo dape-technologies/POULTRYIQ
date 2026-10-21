@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from expenses.models import ExpenseAllocation, ExpenseTransaction
 
 

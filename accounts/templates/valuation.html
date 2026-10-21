@@ -4,169 +4,38 @@
 {% block title %}Owner Valuation - PoultryIQ{% endblock %}
 
 {% block content %}
-<style>
-    .valuation-page {
-        color: #1d2b38;
-    }
 
-    .valuation-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
-    }
-
-    .valuation-title {
-        color: #17324d;
-        font-size: 26px;
-        font-weight: 800;
-        margin: 0 0 4px;
-    }
-
-    .valuation-subtitle {
-        color: #687685;
-        margin: 0;
-    }
-
-    .valuation-card {
-        background: #fff;
-        border: 1px solid #e1e8ee;
-        border-radius: 8px;
-        box-shadow: 0 4px 14px rgba(20, 39, 56, 0.06);
-    }
-
-    .valuation-metrics {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 18px;
-    }
-
-    .valuation-metric {
-        padding: 16px;
-    }
-
-    .valuation-metric span {
-        display: block;
-        color: #687685;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-    }
-
-    .valuation-metric strong {
-        display: block;
-        color: #17324d;
-        font-size: 22px;
-        line-height: 1.2;
-        overflow-wrap: anywhere;
-    }
-
-    .valuation-metric small {
-        display: block;
-        color: #687685;
-        margin-top: 6px;
-    }
-
-    .valuation-grid {
-        display: grid;
-        grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
-        gap: 16px;
-        margin-bottom: 18px;
-    }
-
-    .valuation-section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 16px;
-        border-bottom: 1px solid #e8eef2;
-    }
-
-    .valuation-section-header h5 {
-        margin: 0;
-        color: #17324d;
-        font-size: 16px;
-        font-weight: 800;
-    }
-
-    .valuation-body {
-        padding: 16px;
-    }
-
-    .valuation-chart {
-        height: 280px;
-        position: relative;
-    }
-
-    .valuation-note {
-        border-left: 4px solid #2563eb;
-        border-radius: 8px;
-        background: #f8fbfd;
-        padding: 12px;
-        margin-bottom: 10px;
-    }
-
-    @media (max-width: 1100px) {
-        .valuation-metrics {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .valuation-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .valuation-metrics {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="valuation-page">
+<div class="valuation-page tw:mx-auto tw:w-full">
     <div class="valuation-header">
-        <div>
-            <h1 class="valuation-title">Owner Valuation</h1>
-            <p class="valuation-subtitle">Sole investor view: capital in, farm value, profit, and owner equity.</p>
-        </div>
+        <h1 class="visually-hidden">Owner valuation</h1>
         <a href="{% url 'investor' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Investor Panel
+            <i class="bi bi-arrow-left me-1"></i>Overview
         </a>
     </div>
 
     <div class="valuation-metrics">
         <div class="valuation-card valuation-metric">
-            <span>Startup Capital</span>
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-flag"></i></span><span>Startup capital</span></div>
             <strong>UGX {{ startup_capital|floatformat:0 }}</strong>
-            <small>Initial owner funding</small>
         </div>
         <div class="valuation-card valuation-metric">
-            <span>Total Capital Added</span>
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-plus-circle"></i></span><span>Total capital added</span></div>
             <strong>UGX {{ invested|floatformat:0 }}</strong>
-            <small>Startup plus additions</small>
         </div>
         <div class="valuation-card valuation-metric">
-            <span>Business Value</span>
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-building"></i></span><span>Business value</span></div>
             <strong>UGX {{ business_value|floatformat:0 }}</strong>
-            <small>Assets minus liabilities</small>
         </div>
         <div class="valuation-card valuation-metric">
-            <span>Owner ROI</span>
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-percent"></i></span><span>Owner ROI</span></div>
             <strong>{{ roi|floatformat:2 }}%</strong>
-            <small>Gain over capital added</small>
         </div>
     </div>
 
     <div class="valuation-grid">
         <div class="valuation-card">
             <div class="valuation-section-header">
-                <h5>Add Owner Capital</h5>
+                <h5>Add owner capital</h5>
                 <span class="badge text-bg-primary">Sole investor</span>
             </div>
             <div class="valuation-body">
@@ -194,7 +63,7 @@
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-plus-circle me-1"></i>Save Capital Record
+                            <i class="bi bi-plus-circle me-1"></i>Save capital record
                         </button>
                     </div>
                 </form>
@@ -203,37 +72,33 @@
 
         <div class="valuation-card">
             <div class="valuation-section-header">
-                <h5>Valuation Summary</h5>
+                <h5>Valuation summary</h5>
                 <span class="text-muted small">No shares used</span>
             </div>
             <div class="valuation-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="valuation-card valuation-metric">
-                            <span>Net Owner Capital</span>
+                            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-bank"></i></span><span>Net owner capital</span></div>
                             <strong>UGX {{ net_owner_capital|floatformat:0 }}</strong>
-                            <small>Capital added minus withdrawals</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="valuation-card valuation-metric">
-                            <span>Owner Equity</span>
+                            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-pie-chart"></i></span><span>Owner equity</span></div>
                             <strong>UGX {{ owner_equity|floatformat:0 }}</strong>
-                            <small>The sole investor owns 100%</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="valuation-card valuation-metric">
-                            <span>Profit</span>
+                            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-graph-up"></i></span><span>Profit</span></div>
                             <strong>UGX {{ profit|floatformat:0 }}</strong>
-                            <small>Sales minus expenses</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="valuation-card valuation-metric">
-                            <span>Owner Gain</span>
+                            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-arrow-up-right"></i></span><span>Owner gain</span></div>
                             <strong>UGX {{ owner_gain|floatformat:0 }}</strong>
-                            <small>Equity minus net capital</small>
                         </div>
                     </div>
                 </div>
@@ -244,7 +109,7 @@
     <div class="valuation-grid">
         <div class="valuation-card">
             <div class="valuation-section-header">
-                <h5>Advisor Notes</h5>
+                <h5>Advisor notes</h5>
             </div>
             <div class="valuation-body">
                 {% for note in valuation_notes %}
@@ -255,7 +120,7 @@
 
         <div class="valuation-card">
             <div class="valuation-section-header">
-                <h5>Assets and Capital</h5>
+                <h5>Assets and capital</h5>
             </div>
             <div class="valuation-body">
                 <div class="row g-3">
@@ -276,7 +141,7 @@
 
     <div class="valuation-card">
         <div class="valuation-section-header">
-            <h5>Capital History</h5>
+            <h5>Capital history</h5>
             <span class="text-muted small">Startup and additional owner funding</span>
         </div>
         <div class="valuation-body">
@@ -320,7 +185,7 @@
 (function () {
     if (typeof Chart === "undefined") return;
 
-    const palette = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626"];
+    const palette = ["#1f5a43", "#759184", "#b6a171", "#68766f"];
     const options = {
         responsive: true,
         maintainAspectRatio: false,
