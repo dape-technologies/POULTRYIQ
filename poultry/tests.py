@@ -1,7 +1,9 @@
 import json
+import tempfile
 
 from django.db import connection
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
@@ -28,6 +30,7 @@ from .models import (
     BirdTransfer,
     HouseBirdMovement,
     MortalityCause,
+    MortalityPhoto,
     MortalityRecord,
     PoultryBatch,
     PoultryHouse,
@@ -128,6 +131,29 @@ class SupervisorFieldOperationsTests(TestCase):
                     response.context["batches"],
                     [self.assigned_batch],
                 )
+
+    def test_mortality_photo_is_saved_and_available_in_approval_viewer(self):
+        photo = SimpleUploadedFile("mortality-proof.jpg", b"photo-bytes", content_type="image/jpeg")
+
+        with tempfile.TemporaryDirectory() as media_root, self.settings(MEDIA_ROOT=media_root):
+            response = self.client.post(
+                reverse("mortality"),
+                {
+                    "batch": str(self.assigned_batch.pk),
+                    "count": "2",
+                    "cause": "",
+                    "notes": "Verified at the house",
+                    "photos": [photo],
+                },
+            )
+
+            self.assertRedirects(response, reverse("supdash"))
+            evidence = MortalityPhoto.objects.select_related("mortality_record").get()
+            approval = self.client.get(reverse("supapproval") + "?tab=mortality")
+
+            self.assertEqual(approval.status_code, 200)
+            self.assertContains(approval, evidence.image.url)
+            self.assertContains(approval, 'data-photo-group="mortality-')
 
     def test_supervisor_egg_submission_returns_to_supervisor_dashboard(self):
         response = self.client.post(

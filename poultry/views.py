@@ -2755,7 +2755,7 @@ def supapproval(request):
         ),
         request.user,
         "batch__house",
-    ).select_related("batch__house", "reported_by", "cause").order_by("-reported_at")
+    ).select_related("batch__house", "reported_by", "cause").prefetch_related("photos").order_by("-reported_at")
 
     pending_eggs_count = pending_eggs.count()
     pending_feed_count = pending_feed.count()

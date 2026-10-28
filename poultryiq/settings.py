@@ -45,6 +45,13 @@ def _env_list(name, default=""):
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
 
+def _env_int(name, default):
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
 _load_environment_file(BASE_DIR / ".env.production")
 
 
@@ -99,6 +106,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'accounts.middleware.SessionInactivityMiddleware',
     'accounting.middleware.AutoPostMonthlyDepreciationMiddleware',
     'payroll.middleware.AutoAccrueSalaryLiabilitiesMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -116,6 +124,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.session_expiry',
             ],
         },
     },
@@ -212,6 +221,12 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = _env_bool("DJANGO_SECURE_SSL_REDIRECT", False)
 SESSION_COOKIE_SECURE = _env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
 CSRF_COOKIE_SECURE = _env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
+SESSION_INACTIVITY_TIMEOUT = max(300, _env_int("DJANGO_SESSION_INACTIVITY_TIMEOUT", 1800))
+SESSION_INACTIVITY_WARNING = min(
+    SESSION_INACTIVITY_TIMEOUT - 60,
+    max(60, _env_int("DJANGO_SESSION_INACTIVITY_WARNING", 120)),
+)
+SESSION_COOKIE_AGE = SESSION_INACTIVITY_TIMEOUT
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

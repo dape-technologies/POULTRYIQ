@@ -5,7 +5,7 @@ import zipfile
 from xml.sax.saxutils import escape as xml_escape
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -33,6 +33,7 @@ from accounting.services import get_pl_data, get_bs_data
 from accounts.decorators import manager_required
 
 from .models import EndOfDayNote, InvestorCapitalTransaction, User
+from .middleware import SESSION_ACTIVITY_KEY
 
 # Create your views here.
 
@@ -1602,6 +1603,16 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('login')
+
+
+@require_POST
+@login_required
+def session_heartbeat(request):
+    """Renew the inactivity window after real browser interaction."""
+    request.session[SESSION_ACTIVITY_KEY] = int(timezone.now().timestamp())
+    response = JsonResponse({"active": True})
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @manager_required
