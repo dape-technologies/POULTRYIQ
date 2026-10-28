@@ -235,14 +235,24 @@
                         </td>
                         <td>
                             <small class="text-muted d-block">{{ rec.notes|default:"-"|truncatechars:30 }}</small>
-                            <small class="text-muted d-block">
-                                <i class="bi bi-camera me-1"></i>{{ rec.photos.count }} photo{{ rec.photos.count|pluralize }}
-                                {% if rec.notes_audio %}
-                                <a href="{{ rec.notes_audio.url }}" class="ms-2" target="_blank" rel="noopener">
-                                    <i class="bi bi-volume-up me-1"></i>Voice
-                                </a>
-                                {% endif %}
-                            </small>
+                            {% if rec.photos.all %}
+                            <div class="photo-thumbnail-group" aria-label="{{ rec.photos.count }} cleaning evidence photo{{ rec.photos.count|pluralize }}">
+                                {% for photo in rec.photos.all %}
+                                <button type="button" class="photo-thumbnail" data-photo-preview
+                                        data-photo-src="{{ photo.image.url }}"
+                                        data-photo-group="cleaning-{{ rec.pk }}"
+                                        data-photo-title="Cleaning evidence{% if photo.task_key %}: {{ photo.task_key|capfirst }}{% endif %}"
+                                        aria-label="Enlarge cleaning evidence photo {{ forloop.counter }} of {{ rec.photos.count }}">
+                                    <img src="{{ photo.image.url }}" alt="Cleaning evidence photo {{ forloop.counter }}" loading="lazy">
+                                </button>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if rec.notes_audio %}
+                            <a href="{{ rec.notes_audio.url }}" class="small d-inline-block mt-1" target="_blank" rel="noopener">
+                                <i class="bi bi-volume-up me-1"></i>Voice note
+                            </a>
+                            {% endif %}
                         </td>
                         <td>
                             <div class="d-flex gap-2 justify-content-center">
@@ -297,7 +307,22 @@
                         <td>{{ rec.record_date }}</td>
                         <td><span class="badge bg-danger fs-6">{{ rec.number_dead }}</span></td>
                         <td>{{ rec.cause.name|default:"Unknown" }}</td>
-                        <td><small class="text-muted">{{ rec.notes|default:"-"|truncatechars:30 }}</small></td>
+                        <td>
+                            <small class="text-muted d-block">{{ rec.notes|default:"-"|truncatechars:30 }}</small>
+                            {% if rec.photos.all %}
+                            <div class="photo-thumbnail-group" aria-label="{{ rec.photos.count }} mortality evidence photo{{ rec.photos.count|pluralize }}">
+                                {% for photo in rec.photos.all %}
+                                <button type="button" class="photo-thumbnail" data-photo-preview
+                                        data-photo-src="{{ photo.image.url }}"
+                                        data-photo-group="mortality-{{ rec.pk }}"
+                                        data-photo-title="Mortality evidence for {{ rec.batch.batch_code }}"
+                                        aria-label="Enlarge mortality evidence photo {{ forloop.counter }} of {{ rec.photos.count }}">
+                                    <img src="{{ photo.image.url }}" alt="Mortality evidence photo {{ forloop.counter }}" loading="lazy">
+                                </button>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </td>
                         <td>
                             <div class="d-flex gap-2 justify-content-center">
                                 <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#approveModal"

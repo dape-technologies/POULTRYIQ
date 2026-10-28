@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
+import time
 
 from django.apps import apps
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
 from .models import EndOfDayNote, Role, User
+from .middleware import SESSION_ACTIVITY_KEY
 from poultry.models import ApprovalStatus, MortalityCause, MortalityRecord, PoultryBatch, PoultryHouse, egg_collection
 from expenses.models import ExpenseCategory, ExpenseTransaction
 from sales.models import Customer, CustomerPayment, SaleInvoice
@@ -62,6 +64,41 @@ class UserModelTests(TestCase):
         self.assertTrue(User(role=self.supervisor_role).requires_house_assignment)
         self.assertFalse(User(role=self.manager_role).requires_house_assignment)
         self.assertFalse(User(role=self.owner_role).requires_house_assignment)
+
+
+class SessionInactivityTests(TestCase):
+    def setUp(self):
+        role = Role.objects.create(code=Role.RoleCode.MANAGER, name="Farm Manager")
+        self.user = User.objects.create_user(
+            username="session-manager",
+            password="StrongPass1",
+            role=role,
+        )
+        self.client.force_login(self.user)
+
+    def set_last_activity(self, timestamp):
+        session = self.client.session
+        session[SESSION_ACTIVITY_KEY] = timestamp
+        session.save()
+
+    def test_heartbeat_renews_an_active_session(self):
+        previous = int(time.time()) - 60
+        self.set_last_activity(previous)
+
+        response = self.client.post(reverse("session_heartbeat"), HTTP_ACCEPT="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["active"])
+        self.assertGreater(self.client.session[SESSION_ACTIVITY_KEY], previous)
+
+    def test_expired_session_is_logged_out(self):
+        self.set_last_activity(int(time.time()) - settings.SESSION_INACTIVITY_TIMEOUT - 1)
+
+        response = self.client.post(reverse("session_heartbeat"), HTTP_ACCEPT="application/json")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(response.json()["expired"])
+        self.assertNotIn("_auth_user_id", self.client.session)
 
 
 class SignupViewTests(TestCase):

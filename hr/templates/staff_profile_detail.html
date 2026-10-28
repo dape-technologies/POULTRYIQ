@@ -13,7 +13,12 @@
             <div class="card">
                 <div class="card-body">
                     {% if profile.profile_photo %}
-                        <img src="{{ profile.profile_photo.url }}" class="img-fluid rounded mb-3" alt="{{ staff_user.display_name }}">
+                        <button type="button" class="photo-thumbnail photo-thumbnail--profile" data-photo-preview
+                                data-photo-src="{{ profile.profile_photo.url }}"
+                                data-photo-title="Profile photo: {{ staff_user.display_name }}"
+                                aria-label="Enlarge profile photo for {{ staff_user.display_name }}">
+                            <img src="{{ profile.profile_photo.url }}" alt="Profile photo for {{ staff_user.display_name }}">
+                        </button>
                     {% endif %}
                     <h5>{{ staff_user.display_name }}</h5>
                     <div class="text-muted">{{ profile.job_title|default:staff_user.role.name }}</div>

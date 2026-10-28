@@ -237,6 +237,25 @@ class MortalityRecord(models.Model):
     def __str__(self) -> str:
         return f"{self.batch.batch_code} mortality {self.record_date}: {self.number_dead}"
 
+
+class MortalityPhoto(models.Model):
+    photo_id = models.BigAutoField(primary_key=True)
+    mortality_record = models.ForeignKey(
+        MortalityRecord,
+        on_delete=models.CASCADE,
+        related_name="photos",
+    )
+    image = models.ImageField(upload_to="mortality_photos/%Y/%m/%d/")
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="mortality_photos_uploaded",
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo {self.photo_id} for mortality {self.mortality_record_id}"
+
 class PoultryHouse(models.Model):
     """
     Represents a physical poultry house/unit.

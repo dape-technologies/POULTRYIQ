@@ -12,6 +12,7 @@ from alerts.models import Alert, AlertType
 from .services import get_health_alert_type, get_treatment_alert_receiver, create_treatment_alert
 from poultry.models import (
     MortalityCause,
+    MortalityPhoto,
     MortalityRecord,
     PoultryBatch,
     PoultryHouse,
@@ -61,6 +62,9 @@ def mortality(request):
         #proof of death photos should be mandatory all the time
         if not photos:
             errors.append("Please upload at least one photo as proof of death.")
+        for photo in photos:
+            if not getattr(photo, "content_type", "").startswith("image/"):
+                errors.append("Mortality proof must use image files.")
 
         try:
             number_dead = int(count_raw)
@@ -80,7 +84,7 @@ def mortality(request):
             for error in errors:
                 messages.error(request, error)
         else:
-            MortalityRecord.objects.create(
+            mortality_record = MortalityRecord.objects.create(
                 batch=selected_batch,
                 record_date=record_date,
                 number_dead=number_dead,
@@ -88,6 +92,12 @@ def mortality(request):
                 notes=notes,
                 reported_by=request.user,
             )
+            for photo in photos:
+                MortalityPhoto.objects.create(
+                    mortality_record=mortality_record,
+                    image=photo,
+                    uploaded_by=request.user,
+                )
             messages.success(request, "Mortality record saved successfully.")
             return redirect("supdash" if request.user.is_supervisor else "workersdash")
 
