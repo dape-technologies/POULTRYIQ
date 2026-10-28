@@ -14,6 +14,19 @@
     margin-top: 0.35rem;
 }
 
+.evidence-cell {
+    min-width: 7.5rem;
+}
+
+.evidence-cell .photo-thumbnail-group {
+    margin-top: 0;
+}
+
+.evidence-empty {
+    color: var(--theme-text-muted, #77849a);
+    font-size: 1rem;
+}
+
 .photo-thumbnail {
     position: relative;
     display: inline-grid;

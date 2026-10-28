@@ -203,6 +203,7 @@
                         <th>Date</th>
                         <th>Tasks Completed</th>
                         <th>Notes</th>
+                        <th>Evidence</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -235,6 +236,8 @@
                         </td>
                         <td>
                             <small class="text-muted d-block">{{ rec.notes|default:"-"|truncatechars:30 }}</small>
+                        </td>
+                        <td class="evidence-cell">
                             {% if rec.photos.all %}
                             <div class="photo-thumbnail-group" aria-label="{{ rec.photos.count }} cleaning evidence photo{{ rec.photos.count|pluralize }}">
                                 {% for photo in rec.photos.all %}
@@ -253,6 +256,9 @@
                                 <i class="bi bi-volume-up me-1"></i>Voice note
                             </a>
                             {% endif %}
+                            {% if not rec.photos.all and not rec.notes_audio %}
+                            <span class="evidence-empty" aria-label="No evidence attached">—</span>
+                            {% endif %}
                         </td>
                         <td>
                             <div class="d-flex gap-2 justify-content-center">
@@ -268,7 +274,7 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="6" class="text-center text-muted py-5">
+                    <tr><td colspan="7" class="text-center text-muted py-5">
                         <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
                         No pending cleaning submissions — all caught up!
                     </td></tr>
@@ -290,6 +296,7 @@
                         <th>Deaths</th>
                         <th>Cause</th>
                         <th>Notes</th>
+                        <th>Evidence</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -309,6 +316,8 @@
                         <td>{{ rec.cause.name|default:"Unknown" }}</td>
                         <td>
                             <small class="text-muted d-block">{{ rec.notes|default:"-"|truncatechars:30 }}</small>
+                        </td>
+                        <td class="evidence-cell">
                             {% if rec.photos.all %}
                             <div class="photo-thumbnail-group" aria-label="{{ rec.photos.count }} mortality evidence photo{{ rec.photos.count|pluralize }}">
                                 {% for photo in rec.photos.all %}
@@ -321,6 +330,8 @@
                                 </button>
                                 {% endfor %}
                             </div>
+                            {% else %}
+                            <span class="evidence-empty" aria-label="No evidence attached">—</span>
                             {% endif %}
                         </td>
                         <td>
@@ -337,7 +348,7 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="7" class="text-center text-muted py-5">
+                    <tr><td colspan="8" class="text-center text-muted py-5">
                         <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
                         No pending mortality reports — all caught up!
                     </td></tr>
