@@ -216,6 +216,13 @@ class LoginRedirectTests(TestCase):
         self.assertContains(response, 'images/login-hen-nest.png')
         self.assertContains(response, 'alt="Brown hen sitting on eggs in a straw nest"')
 
+    def test_login_page_refreshes_csrf_token_before_submit(self):
+        response = self.client.get(reverse("login"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="login-form"')
+        self.assertContains(response, "js/login-csrf.js")
+
     def test_worker_login_redirects_to_workers_dashboard(self):
         user = User.objects.create_user(
             username="worker-login",
@@ -268,6 +275,26 @@ class LoginRedirectTests(TestCase):
         )
 
         self.assertRedirects(response, reverse("managerdash"))
+
+    def test_manager_login_resolves_to_successful_dashboard_response(self):
+        User.objects.create_user(
+            username="manager-http-success",
+            password="StrongPass1",
+            role=self.manager_role,
+        )
+
+        response = self.client.post(
+            reverse("login"),
+            {
+                "username": "manager-http-success",
+                "password": "StrongPass1",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.url_name, "managerdash")
+        self.assertEqual(int(self.client.session["_auth_user_id"]), response.context["user"].pk)
 
     def test_investor_login_redirects_to_investor_dashboard(self):
         User.objects.create_user(
@@ -382,6 +409,38 @@ class NavSidebarVisibilityTests(TestCase):
         self.assertNotContains(response, 'id="managerSidebar"')
         self.assertNotContains(response, "Worker Panel")
         self.assertNotContains(response, "Supervisor Panel")
+
+
+class InvestorWorkflowPageTests(TestCase):
+    """Investor workflows remain accessible after UI-only changes."""
+
+    def setUp(self):
+        owner_role = Role.objects.create(code=Role.RoleCode.OWNER, name="Investor")
+        self.investor = User.objects.create_user(
+            username="workflow-investor",
+            password="StrongPass1",
+            role=owner_role,
+        )
+        self.client.force_login(self.investor)
+
+    def test_overview_returns_http_200(self):
+        response = self.client.get(reverse("investor"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Investment overview")
+
+    def test_valuation_returns_http_200(self):
+        response = self.client.get(reverse("valuation"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Owner valuation")
+
+    def test_reports_returns_http_200_and_builds_balance_sheet(self):
+        response = self.client.get(reverse("investor_reports"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Fixed-assets snapshot")
+        self.assertIn("bs_data", response.context)
 
 
 class EndOfDayViewTests(TestCase):

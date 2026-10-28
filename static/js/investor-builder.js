@@ -15,12 +15,14 @@
 
     const qs = (selector, parent = root) => parent.querySelector(selector);
     const qsa = (selector, parent = root) => Array.from(parent.querySelectorAll(selector));
+    const targetQs = (selector) => document.querySelector(selector);
     const metricByKey = new Map(catalog.metrics.map((metric) => [metric.key, metric]));
     const dimensionByKey = new Map(catalog.dimensions.map((dimension) => [dimension.key, dimension]));
     const questionByKey = new Map(catalog.questions.map((question) => [question.key, question]));
     const csrfToken = qs('input[name="csrfmiddlewaretoken"]').value;
     const panels = qsa("[data-analysis-panel]");
     const charts = [];
+    let statusTimer = null;
     const state = {
         mode: "guided",
         step: "question",
@@ -48,8 +50,12 @@
 
     function showStatus(message = "", type = "") {
         const node = qs("#analysisStatus");
+        window.clearTimeout(statusTimer);
         node.className = `analysis-status${message ? "" : " d-none"}${type ? ` is-${type}` : ""}`;
         node.textContent = message;
+        if (message && type === "success") {
+            statusTimer = window.setTimeout(() => showStatus(), 3200);
+        }
     }
 
     function setBusy(isBusy) {
@@ -348,7 +354,7 @@
             labels,
             datasets: metrics.map((metric, index) => {
                 const values = new Map(metric.points.map((point) => [point.label, point.value]));
-                const colors = ["#087abd", "#f59e0b", "#16a34a", "#dc3545", "#7c3aed", "#64748b"];
+                const colors = ["#1f5a43", "#50677b", "#b6a171", "#759184", "#9a6515", "#68766f"];
                 const color = colors[index % colors.length];
                 return {
                     label: metric.label,
@@ -375,7 +381,7 @@
             });
         }
         if (type === "pie") {
-            data.datasets[0].backgroundColor = ["#087abd", "#f59e0b", "#16a34a", "#dc3545", "#7c3aed", "#64748b", "#0ea5e9", "#84cc16"];
+            data.datasets[0].backgroundColor = ["#1f5a43", "#50677b", "#b6a171", "#759184", "#9a6515", "#68766f", "#38483f", "#8a968f"];
         }
         charts.push(new Chart(canvas, {
             type,
@@ -468,13 +474,13 @@
     }
 
     async function loadTargets() {
-        const status = qs("#analysisTargetStatus");
+        const status = targetQs("#analysisTargetStatus");
         status.textContent = "Loading target history…";
         try {
             const response = await fetch(root.dataset.targetsUrl, { credentials: "same-origin" });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Target history could not be loaded.");
-            qs("#analysisTargetHistory").innerHTML = data.targets.length
+            targetQs("#analysisTargetHistory").innerHTML = data.targets.length
                 ? data.targets.map((target) => `
                     <tr><th>${escapeHtml(target.metricLabel)}</th><td>${target.direction === "MINIMUM" ? "At least" : "At most"}</td>
                     <td>${escapeHtml(String(target.value))}</td><td>${escapeHtml(formatDate(target.effectiveFrom))} – ${target.effectiveTo ? escapeHtml(formatDate(target.effectiveTo)) : "Current"}</td>
@@ -530,12 +536,12 @@
     const targetsButton = qs("#analysisTargetsButton");
     if (targetsButton) targetsButton.addEventListener("click", () => {
         loadTargets();
-        bootstrap.Modal.getOrCreateInstance(qs("#analysisTargetsModal")).show();
+        bootstrap.Modal.getOrCreateInstance(targetQs("#analysisTargetsModal")).show();
     });
-    const targetForm = qs("#analysisTargetForm");
+    const targetForm = targetQs("#analysisTargetForm");
     if (targetForm) targetForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const status = qs("#analysisTargetStatus");
+        const status = targetQs("#analysisTargetStatus");
         status.className = "mt-3";
         status.textContent = "Saving target…";
         try {
@@ -544,16 +550,16 @@
                 credentials: "same-origin",
                 headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
                 body: JSON.stringify({
-                    metricKey: qs("#analysisTargetMetric").value,
-                    targetValue: qs("#analysisTargetValue").value,
-                    effectiveFrom: qs("#analysisTargetDate").value,
+                    metricKey: targetQs("#analysisTargetMetric").value,
+                    targetValue: targetQs("#analysisTargetValue").value,
+                    effectiveFrom: targetQs("#analysisTargetDate").value,
                 }),
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "The target could not be saved.");
             status.className = "mt-3 text-success";
             status.textContent = "Target version saved.";
-            qs("#analysisTargetValue").value = "";
+            targetQs("#analysisTargetValue").value = "";
             await loadTargets();
         } catch (error) {
             status.className = "mt-3 text-danger";

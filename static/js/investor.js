@@ -15,14 +15,14 @@
     let chart;
 
     const palette = [
-        "#2563eb",
-        "#16a34a",
-        "#dc2626",
-        "#f59e0b",
-        "#7c3aed",
-        "#0891b2",
-        "#be123c",
-        "#475569",
+        "#1f5a43",
+        "#759184",
+        "#9a6515",
+        "#a13e38",
+        "#50677b",
+        "#b6a171",
+        "#68766f",
+        "#38483f",
     ];
 
     function formatValue(value, unit) {
@@ -172,11 +172,11 @@
 
     const data = JSON.parse(dataNode.textContent);
     const palette = {
-        revenue: "#0b73b9",
-        expenses: "#dc3545",
-        profit: "#159c72",
-        warning: "#d97706",
-        neutral: "#526273",
+        revenue: "#50677b",
+        expenses: "#a13e38",
+        profit: "#28724d",
+        warning: "#9a6515",
+        neutral: "#68766f",
     };
 
     function money(value) {
@@ -224,8 +224,8 @@
             datasets: [{
                 label: "Expenses",
                 data: costDrivers.map((item) => item.value),
-                backgroundColor: "#dc354566",
-                borderColor: "#dc3545",
+                backgroundColor: "#a13e3866",
+                borderColor: "#a13e38",
                 borderWidth: 2,
                 borderRadius: 6,
             }],
@@ -252,8 +252,8 @@
             datasets: [{
                 label: "UGX",
                 data: unitEconomics.map((item) => item.value),
-                backgroundColor: ["#0b73b966", "#d9770666", "#159c7266", "#dc354566"],
-                borderColor: ["#0b73b9", "#d97706", "#159c72", "#dc3545"],
+                backgroundColor: ["#50677b66", "#9a651566", "#28724d66", "#a13e3866"],
+                borderColor: ["#50677b", "#9a6515", "#28724d", "#a13e38"],
                 borderWidth: 2,
                 borderRadius: 6,
             }],
@@ -278,7 +278,7 @@
             labels: cashRisk.map((item) => item.label),
             datasets: [{
                 data: cashRisk.map((item) => item.value),
-                backgroundColor: ["#159c72", "#d97706", "#dc3545"],
+                backgroundColor: ["#28724d", "#9a6515", "#a13e38"],
                 borderColor: "#ffffff",
                 borderWidth: 2,
             }],

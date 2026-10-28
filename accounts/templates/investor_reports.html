@@ -1,103 +1,87 @@
 {% extends 'base.html' %}
+
+{% block title %}Investor Reports - PoultryIQ{% endblock %}
+
 {% block content %}
+<div class="investor-reports tw:mx-auto tw:w-full">
+    <header class="reports-header">
+        <h1 class="visually-hidden">Investor reports</h1>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>Print report
+        </button>
+    </header>
 
-<div class="container-fluid">
-    <div class="page-header-row mb-4">
-        <div>
-            <h3 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Investor Reports</h3>
-            <small class="text-muted">Profitability and balance sheet snapshot with depreciation impact</small>
+    <form method="get" class="reports-card reports-toolbar">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label" for="report-start-date">From date</label>
+                <input id="report-start-date" type="date" name="start_date" value="{{ start_date }}" class="form-control">
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label" for="report-end-date">To date</label>
+                <input id="report-end-date" type="date" name="end_date" value="{{ end_date }}" class="form-control">
+            </div>
+            <div class="col-6 col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Apply</button>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="{% url 'investor_reports' %}" class="btn btn-outline-secondary w-100">Clear</a>
+            </div>
         </div>
-    </div>
+    </form>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">From Date</label>
-                    <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">To Date</label>
-                    <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <a href="{% url 'investor_reports' %}" class="btn btn-outline-secondary w-100">Clear</a>
-                </div>
-            </form>
+    <section class="reports-metrics" aria-label="Report highlights">
+        <div class="reports-card reports-metric">
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-graph-up-arrow"></i></span><span>Net profit / loss</span></div>
+            <strong>UGX {{ pl_data.totals.profit_loss|floatformat:2 }}</strong>
         </div>
-    </div>
+        <div class="reports-card reports-metric">
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-calendar3"></i></span><span>Period depreciation</span></div>
+            <strong>UGX {{ pl_data.totals.depreciation|floatformat:2 }}</strong>
+        </div>
+        <div class="reports-card reports-metric">
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-layers"></i></span><span>Accumulated depreciation</span></div>
+            <strong>UGX {{ accumulated_depreciation_total|floatformat:2 }}</strong>
+        </div>
+        <div class="reports-card reports-metric">
+            <div class="metric-heading"><span class="metric-icon"><i class="bi bi-journal-check"></i></span><span>Net book value</span></div>
+            <strong>UGX {{ net_book_value|floatformat:2 }}</strong>
+        </div>
+    </section>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card h-100 border-primary">
-                <div class="card-body">
-                    <small class="text-muted">Net Profit / Loss</small>
-                    <h5 class="mb-0">{{ pl_data.totals.profit_loss|floatformat:2 }}</h5>
-                </div>
+    <div class="reports-grid">
+        <section class="reports-card">
+            <header class="reports-section-header">
+                <h5><i class="bi bi-cash-coin me-2"></i>Profit and loss summary</h5>
+                <span class="text-muted small">Selected period</span>
+            </header>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr><td>Total income</td><td class="money">UGX {{ pl_data.totals.total_income|floatformat:2 }}</td></tr>
+                        <tr><td>Total expenses</td><td class="money">UGX {{ pl_data.totals.total_expenses|floatformat:2 }}</td></tr>
+                        <tr><td>Depreciation</td><td class="money">UGX {{ pl_data.totals.depreciation|floatformat:2 }}</td></tr>
+                        <tr class="fw-bold"><td>Net profit / loss</td><td class="money">UGX {{ pl_data.totals.profit_loss|floatformat:2 }}</td></tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-warning">
-                <div class="card-body">
-                    <small class="text-muted">Period Depreciation (P&L)</small>
-                    <h5 class="mb-0">{{ pl_data.totals.depreciation|floatformat:2 }}</h5>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-danger">
-                <div class="card-body">
-                    <small class="text-muted">Accumulated Depreciation (BS)</small>
-                    <h5 class="mb-0">{{ accumulated_depreciation_total|floatformat:2 }}</h5>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-success">
-                <div class="card-body">
-                    <small class="text-muted">Net Book Value</small>
-                    <h5 class="mb-0">{{ net_book_value|floatformat:2 }}</h5>
-                </div>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header"><i class="bi bi-cash-coin me-2"></i>P&L Summary</div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <tbody>
-                            <tr><td>Total Income</td><td class="text-end">{{ pl_data.totals.total_income|floatformat:2 }}</td></tr>
-                            <tr><td>Total Expenses</td><td class="text-end">{{ pl_data.totals.total_expenses|floatformat:2 }}</td></tr>
-                            <tr><td>Depreciation</td><td class="text-end">{{ pl_data.totals.depreciation|floatformat:2 }}</td></tr>
-                            <tr class="fw-bold"><td>Net Profit / Loss</td><td class="text-end">{{ pl_data.totals.profit_loss|floatformat:2 }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <section class="reports-card">
+            <header class="reports-section-header">
+                <h5><i class="bi bi-building me-2"></i>Fixed-assets snapshot</h5>
+                <span class="text-muted small">Balance sheet</span>
+            </header>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr><td>Gross fixed assets</td><td class="money">UGX {{ fixed_assets_total|floatformat:2 }}</td></tr>
+                        <tr><td>Accumulated depreciation</td><td class="money">UGX {{ accumulated_depreciation_total|floatformat:2 }}</td></tr>
+                        <tr class="fw-bold"><td>Net book value</td><td class="money">UGX {{ net_book_value|floatformat:2 }}</td></tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header"><i class="bi bi-building me-2"></i>Fixed Assets Snapshot</div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <tbody>
-                            <tr><td>Gross Fixed Assets</td><td class="text-end">{{ fixed_assets_total|floatformat:2 }}</td></tr>
-                            <tr><td>Accumulated Depreciation</td><td class="text-end">{{ accumulated_depreciation_total|floatformat:2 }}</td></tr>
-                            <tr class="fw-bold"><td>Net Book Value</td><td class="text-end">{{ net_book_value|floatformat:2 }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
 </div>
-
 {% endblock %}
